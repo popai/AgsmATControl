@@ -4,10 +4,10 @@
 // - extern variable definitions
 // In the appropriate section
 
-#ifndef GsmControl2_H_
-#define GsmControl2_H_
+#ifndef xGsmControl_H_
+#define xGsmControl_H_
 #include "Arduino.h"
-//add your includes for the project GsmControl2 here
+//add your includes for the project xGsmControl here
 
 
 //end of add your includes here
@@ -20,10 +20,10 @@ void setup();
 } // extern "C"
 #endif
 
-//add your function definitions for the project GsmControl2 here
+//add your function definitions for the project xGsmControl here
 
 
 
 
 //Do not add code below this line
-#endif /* GsmControl2_H_ */
+#endif /* xGsmControl_H_ */

@@ -1,3 +1,17 @@
+/******************************************************************************
+
+  gsm.h
+
+  Created on: Apr 14, 2013
+  Author: popai
+
+ ADC Core
+ ----------
+ This module is used for interfacing AVR's Inbuilt ADC(Analog To Digital Convertor).
+ For More information please see supplied tutorials and videos.
+
+ *******************************************************************************/
+
 #ifndef _ADC_H
 #define _ADC_H
 

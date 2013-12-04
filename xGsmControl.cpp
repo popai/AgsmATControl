@@ -1,13 +1,12 @@
 /*
- * smControl.cpp
+ * gsmControl.cpp
  *
- *  Created on: June 02, 2013
+ *  Created on: Feb 4, 2013
  *      Author: popai
  */
 
 // Do not remove the include below
-
-#include "GsmControl2.h"
+#include "xGsmControl.h"
 #include "pinDef.h"
 #include "cmd.h"
 #include "gsm.h"
@@ -20,6 +19,7 @@ const prog_char citeste[] PROGMEM = "citeste";
 //The setup function is called once at startup of the sketch
 
 bool config = false, delEEPROM = false, cfgpc = false;
+int contor = 5000;
 
 char read[24];
 char teln[10];
@@ -38,7 +38,7 @@ void setup()
 	Serial.println("PP");
 	//Serial.println("-----------------------------------");
 #endif
-	//PORTB = (1 << PB4);
+	PORTB = (1 << PB4);
 	if (AT_INIT() != 1)
 		PORTB = (1 << PB5);
 	//PORTB &= ~(1 << PB4);
@@ -80,6 +80,12 @@ void loop()
 	int id;
 	if (delEEPROM)
 		return;
+	if (contor == 5000)
+	{
+		contor = 0;
+		BateryFull();
+	}
+	++contor;
 
 	if (cfgpc)
 	{

@@ -17,35 +17,33 @@
 //#include <math.h>
 
 //"Flash store comands etc are strings to store
-const prog_char IN1[] PROGMEM = "IN1";			//adresa 18*2
-const prog_char IN2[] PROGMEM = "IN2";			//adresa 18*3
-const prog_char IN3[] PROGMEM = "IN3";			//adresa 18*4
-const prog_char IN4[] PROGMEM = "IN4";			//adresa 18*5
+const prog_char IN1[] PROGMEM = "IN1";		//adresa 18*2
+const prog_char IN2[] PROGMEM = "IN2";		//adresa 18*3
+const prog_char IN3[] PROGMEM = "IN3";		//adresa 18*4
+const prog_char IN4[] PROGMEM = "IN4";		//adresa 18*5
 const prog_char OUT1L[] PROGMEM = "OUT1L";		//adresa 18*6
 const prog_char OUT1H[] PROGMEM = "OUT1H";		//adresa 18*7
 const prog_char OUT2L[] PROGMEM = "OUT2L";		//adresa 18*8
 const prog_char OUT2H[] PROGMEM = "OUT2H";		//adresa 18*9
 const prog_char OUT3L[] PROGMEM = "OUT3L";		//adresa 18*10
 const prog_char OUT3H[] PROGMEM = "OUT3H";		//adresa 18*11
-const prog_char OUT4L[] PROGMEM = "OUT4L";		//adresa 18*12
-const prog_char OUT4H[] PROGMEM = "OUT4H";		//adresa 18*13
-const prog_char OUT5L[] PROGMEM = "OUT5L";		//adresa 18*14
-const prog_char OUT5H[] PROGMEM = "OUT5H";		//adresa 18*15
-const prog_char OUT6L[] PROGMEM = "OUT6L";		//adresa 18*16
-const prog_char OUT6H[] PROGMEM = "OUT6H";		//adresa 18*17
-const prog_char TMP1[] PROGMEM = "TMP1";		//adresa 18*18
-const prog_char TMP2[] PROGMEM = "TMP2";		//adresa 18*19
-const prog_char TMP3[] PROGMEM = "TMP3";		//adresa 18*20
-const prog_char LOGIN[] PROGMEM = "LOGIN";		//adresa 18*21
-const prog_char STARE_OUT[] PROGMEM = "STARE OUT";	//adresa 18*22
-const prog_char STARE_TMP[] PROGMEM = "STARE TMP";	//adresa 18*23
-const prog_char STARE_ALL[] PROGMEM = "STARE ALL";	//adresa 18*24
-//const prog_char OK[] PROGMEM = "OK";	//adresa 18*25
+const prog_char OUT4L[] PROGMEM = "OUT4L";	//adresa 18*12
+const prog_char OUT4H[] PROGMEM = "OUT4H";	//adresa 18*13
+const prog_char OUT5L[] PROGMEM = "OUT5L";	//adresa 18*14
+const prog_char OUT5H[] PROGMEM = "OUT5H";	//adresa 18*15
+const prog_char TMP1[] PROGMEM = "TMP1";		//adresa 18*16
+const prog_char TMP2[] PROGMEM = "TMP2";		//adresa 18*17
+const prog_char TMP3[] PROGMEM = "TMP3";		//adresa 18*18
+const prog_char LOGIN[] PROGMEM = "LOGIN";	//adresa 18*19
+const prog_char STARE_OUT[] PROGMEM = "STARE OUT";	//adresa 18*20
+const prog_char STARE_TMP[] PROGMEM = "STARE TMP";	//adresa 18*21
+const prog_char STARE_ALL[] PROGMEM = "STARE ALL";	//adresa 18*22
+//const prog_char OK[] PROGMEM = "OK";	//adresa 18*22
 
 // The table to refer to my strings.
 const char *comenzi[]PROGMEM =
 { IN1, IN2, IN3, IN4, OUT1L, OUT1H, OUT2L, OUT2H, OUT3L, OUT3H, OUT4L, OUT4H,
-		OUT5L, OUT5H, OUT6L, OUT6H, TMP1, TMP2, TMP3, LOGIN };
+		OUT5L, OUT5H, TMP1, TMP2, TMP3, LOGIN };
 
 //int8_t in1 = 1, in2 = 1, in3 = 1, in4 = 1;
 bool in1 = true;
@@ -61,7 +59,7 @@ int8_t CfgCmd(char *inbuffer)
 	char comanda[7];
 	int8_t i;
 
-	for (i = 0; i < 20; ++i)
+	for (i = 0; i < 18; ++i)
 	{
 		strcpy_P(comanda, (char*) pgm_read_word(&(comenzi[i]))); // Necessary casts and dereferencing, just copy.
 		if (strstr(inbuffer, comanda) != 0)
@@ -413,26 +411,6 @@ void StareOUT(char *nrtel)
 			//strcat(mesage, "\n");
 		}
 	}
-
-	if ((PIND & (1 << PD7)) == 0)
-	{
-		ReadEprom(buffer, 18 * 16);
-		if (strlen(buffer) != 0)
-		{
-			strcat(mesage, buffer);
-			strcat_P(mesage, PSTR("\r\n"));
-		}
-	}
-	else
-	{
-		ReadEprom(buffer, 18 * 17);
-		if (strlen(buffer) != 0)
-		{
-			strcat(mesage, buffer);
-			//strcat(mesage, "\n");
-		}
-	}
-
 	if (strlen(mesage) != 0)
 		SendSms(nrtel, mesage);
 }
@@ -440,14 +418,14 @@ void StareOUT(char *nrtel)
 //calculate the temperature in grads Celsius dead by a 10K termistor
 float Thermistor(int Tpin)
 {
-	int Vo;
+	float Vo;
 	float logRt, Rt, T;
 	float R = 9870; // fixed resistance, measured with multimeter
 	// c1, c2, c3 are calibration coefficients for a particular thermistor
 	float c1 = 1.009249522e-03, c2 = 2.378405444e-04, c3 = 2.019202697e-07;
 	//Vo = analogRead(Tpin);
 	Vo = ReadADC(Tpin);
-	Rt = R * (1024.0 / float(Vo) - 1.0);
+	Rt = R * (1024.0 / Vo - 1.0);
 	logRt = log(Rt);
 	T = (1.0 / (c1 + c2 * logRt + c3 * logRt * logRt * logRt)) - 273.15;
 	return T;
@@ -467,7 +445,7 @@ void StareTMP(char *nrtel)
 	tmp2 = Thermistor(PC0);
 	tmp = (tmp + tmp1 + tmp2) / 3;
 
-	ReadEprom(buffer, 18 * 18);
+	ReadEprom(buffer, 18 * 16);
 	if (strlen(buffer) != 0)
 	{
 		sprintf(tmpe, " %s: %d %s", buffer, tmp, "C\r\n");
@@ -481,7 +459,7 @@ void StareTMP(char *nrtel)
 	tmp2 = Thermistor(PC1);
 	tmp = (tmp + tmp1 + tmp2) / 3;
 
-	ReadEprom(buffer, 18 * 19);
+	ReadEprom(buffer, 18 * 17);
 	if (strlen(buffer) != 0)
 	{
 		sprintf(tmpe, " %s: %d %s", buffer, tmp, "C\r\n");
@@ -495,7 +473,7 @@ void StareTMP(char *nrtel)
 	tmp2 = Thermistor(PC2);
 	tmp = (tmp + tmp1 + tmp2) / 3;
 
-	ReadEprom(buffer, 18 * 20);
+	ReadEprom(buffer, 18 * 18);
 	if (strlen(buffer) != 0)
 	{
 		sprintf(tmpe, " %s: %d %c", buffer, tmp, 'C');

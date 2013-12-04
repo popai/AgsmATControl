@@ -25,6 +25,8 @@ const prog_char AT_CNMI[] PROGMEM = "AT+CNMI=1,1,0,0,1"; //< Identification of n
 const prog_char AT_CPMS[] PROGMEM = "AT+CPMS=\"ME\""; 	//< Preferred storage
 const prog_char AT_CMGF[] PROGMEM = "AT+CMGF=1"; //< Send SMS string format 0 = PDU, 1 = text mod
 const prog_char CMTI[] PROGMEM = "+CMTI:";
+const prog_char AT_CBC[] PROGMEM = "AT+CIND?";
+const prog_char CBC[] PROGMEM = "+CIND:";
 const prog_char OK[] PROGMEM = "OK";
 //const prog_char ERROR[] PROGMEM = "ERROR";
 const prog_char CMD_ERR[] PROGMEM = "Comanda ne scrisa";
@@ -49,6 +51,7 @@ int8_t AT_INIT()
 */
 	strcpy_P(buffer, CMD_ERR);
 	eeprom_update_block(buffer, (int*) 486, 24);
+
 	//*buffer = 0x00;
 	PORTB = (1 << PB4);
 	digitalWrite(12, HIGH);
@@ -160,7 +163,7 @@ int8_t DellSms(const int id)
 	else
 	{
 		PORTB &= ~(1 << PB4);
-		PORTB |= (1 << PB5);
+		PORTB = (1 << PB5);
 		return 0;
 	}
 }
@@ -202,7 +205,7 @@ int8_t ReadSms(const int id, char* nrtel, char *msg)
 		return 1;
 	}
 	PORTB &= ~(1 << PB4);
-	PORTB |= (1 << PB5);
+	PORTB = (1 << PB5);
 	return 0;
 }
 
@@ -237,9 +240,8 @@ void SendSms(const char *num, const char *msg)
  **********************************************************/
 int8_t SerialRead(char *citit)
 {
-	int8_t i = 0;
-	int8_t j = 24;
-	while (Serial.available() > 0 || j--)
+	int i = 0;
+	while (Serial.available() > 0)
 	{
 		char c = Serial.read();
 		if ((c != '\r') && (c != '\n'))
@@ -255,6 +257,40 @@ int8_t SerialRead(char *citit)
 	return i;
 }
 
+int8_t BateryFull()
+{
+	char flashstr[24];
+	char *ch;
+	int bat = 0;
+	//strcpy_P(flashstr, (char*) pgm_read_word(&(AT[12])));
+	strcpy_P(flashstr, AT_CBC);
+	Serial.println(flashstr);
+	delay(1000);
+
+	SerialRead(flashstr);
+	if (strstr_P(flashstr, CBC) != 0)
+	{
+		ch = strchr(flashstr,':');
+		ch++;
+		bat = atoi(ch);
+		//Serial.println(bat);
+	}
+	if (bat == 5)
+	{
+		//digitalWrite(outD6, HIGH);
+		PORTD |= (1<<PD7);
+		//Serial.println("off");
+		return 1;
+	}
+
+	else
+	{
+		//digitalWrite(outD6, LOW);
+		PORTD &= ~(1<<PD7);
+		//Serial.println("on");
+		return 0;
+	}
+}
 
 /**
  * @breaf set the port on startup
